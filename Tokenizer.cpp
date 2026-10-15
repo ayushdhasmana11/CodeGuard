@@ -27,7 +27,7 @@ vector<string> Tokenizer::tokenize(const string& source) const {
         if (isspace(ch)) { ++i; continue; }
         if (source[i] == '/' && i + 1 < source.size() && source[i+1] == '/') {
             i += 2;
-            while (i < source.size() && source[i] != '\\n') ++i;
+            while (i < source.size() && source[i] != '\n') ++i;
             continue;
         }
         if (source[i] == '/' && i + 1 < source.size() && source[i+1] == '*') {
@@ -37,10 +37,10 @@ vector<string> Tokenizer::tokenize(const string& source) const {
             if (i + 1 < source.size()) i += 2;
             continue;
         }
-        if (source[i] == '"' || source[i] == '\\'') {
+        if (source[i] == '"' || source[i] == '\'') {
             char quote = source[i++];
             while (i < source.size()) {
-                if (source[i] == '\\\\' && i + 1 < source.size()) i += 2;
+                if (source[i] == '\\' && i + 1 < source.size()) i += 2;
                 else if (source[i] == quote) { ++i; break; }
                 else ++i;
             }

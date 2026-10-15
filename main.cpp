@@ -3,8 +3,8 @@
 #include<string>
 #include<vector>
 
-#include "reader/codereader.h"
-#include "preprocessing/Preprocessor.h"
+#include "Reader/CodeReader.h"
+#include "Preprocessing/Preprocessor.h"
 
 using namespace std;
 

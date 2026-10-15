@@ -1,6 +1,10 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -42,5 +46,9 @@ const SourceFile *hash_table_lookup(
 
 /* Release all allocated memory */
 void hash_table_destroy(HashTable *table);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

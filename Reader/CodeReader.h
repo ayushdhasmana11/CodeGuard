@@ -1,20 +1,20 @@
 #ifndef CODEREADER_H
 #define CODEREADER_H
 
-#include<string>
-#include<vector>
-#include<filesystem>
-
-using namespace std;
+#include <string>
+#include <vector>
+#include <filesystem>
 
 namespace fs = std::filesystem;
 
-class CodeReader{
-  public: string readFile(string fileName); // It read one file and return its content as a string
+class CodeReader
+{
+public:
+    std::string readFile(const std::string& fileName);
 
-
-  // find c++ files in folder
-  vector<fs::path> getCppFiles(const string& folderpath);
+    std::vector<fs::path> getCppFiles(
+        const std::string& folderPath
+    );
 };
 
 #endif

@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Compiled object files
+*.o
+
+# Generated executables
+CodeGuard
+main.exe
+hash_table_test
+pipeline_test
+preprocessor_test
+reader_test
