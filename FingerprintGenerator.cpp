@@ -15,3 +15,23 @@ static uint64_t hashToken(const string& token) {
 
     return hash;
 }
+// Part 3: Hash the input tokens.
+// This is an intermediate implementation; the next part will combine
+// consecutive token hashes into rolling-window fingerprints.
+vector<uint64_t> FingerprintGenerator::generate(
+    const vector<string>& tokens) const {
+
+    vector<uint64_t> fingerprints;
+
+    if (tokens.empty()) {
+        return fingerprints;
+    }
+
+    fingerprints.reserve(tokens.size());
+
+    for (const string& token : tokens) {
+        fingerprints.push_back(hashToken(token));
+    }
+
+    return fingerprints;
+}
