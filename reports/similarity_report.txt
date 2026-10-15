@@ -1,0 +1,43 @@
+========== RANKED SIMILARITY REPORT ==========
+
+Rank #1
+student1.cpp <-> student2.cpp
+Unique fingerprints in A: 31
+Unique fingerprints in B: 31
+Shared unique fingerprints: 31
+Similarity: 100.00%
+
+Rank #2
+student1.cpp <-> student3.cpp
+Unique fingerprints in A: 31
+Unique fingerprints in B: 19
+Shared unique fingerprints: 10
+Similarity: 40.00%
+
+Rank #3
+student2.cpp <-> student3.cpp
+Unique fingerprints in A: 31
+Unique fingerprints in B: 19
+Shared unique fingerprints: 10
+Similarity: 40.00%
+
+Rank #4
+1791637114835-q2.cpp <-> student1.cpp
+Unique fingerprints in A: 99
+Unique fingerprints in B: 31
+Shared unique fingerprints: 17
+Similarity: 26.15%
+
+Rank #5
+1791637114835-q2.cpp <-> student2.cpp
+Unique fingerprints in A: 99
+Unique fingerprints in B: 31
+Shared unique fingerprints: 17
+Similarity: 26.15%
+
+Rank #6
+1791637114835-q2.cpp <-> student3.cpp
+Unique fingerprints in A: 99
+Unique fingerprints in B: 19
+Shared unique fingerprints: 11
+Similarity: 18.64%

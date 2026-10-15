@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <filesystem>
 #include <string>
@@ -7,6 +8,7 @@
 #include <iomanip>
 #include <cstdint>
 #include <stdexcept>
+#include <sstream>
 
 #include "Reader/CodeReader.h"
 #include "Preprocessing/Preprocessor.h"
@@ -169,32 +171,49 @@ int main()
              });
 
         // Stage 4: Print the ranked report.
+
+        ofstream report("reports/similarity_report.txt");
+
+if (!report.is_open())
+{
+    throw runtime_error("Could not create similarity report file.");
+}
+
+report << "========== RANKED SIMILARITY REPORT ==========\n";
+
         cout << "\n========== RANKED SIMILARITY REPORT ==========\n";
+
 
         cout << fixed << setprecision(2);
 
-        for (size_t i = 0; i < results.size(); ++i)
-        {
-            const auto& result = results[i];
+        auto printLine = [&](const string& text)
+{
+    cout << text;
+    report << text;
+};
 
-            cout << "\nRank #" << i + 1 << '\n';
+      for (size_t i = 0; i < results.size(); ++i)
+{
+    const auto& result = results[i];
 
-            cout << result.fileA
-                 << " <-> " << result.fileB << '\n';
+    printLine("\nRank #" + to_string(i + 1) + "\n");
+    printLine(result.fileA + " <-> " + result.fileB + "\n");
 
-            cout << "Unique fingerprints in A: "
-                 << result.uniqueA << '\n';
+    printLine("Unique fingerprints in A: " +
+              to_string(result.uniqueA) + "\n");
 
-            cout << "Unique fingerprints in B: "
-                 << result.uniqueB << '\n';
+    printLine("Unique fingerprints in B: " +
+              to_string(result.uniqueB) + "\n");
 
-            cout << "Shared unique fingerprints: "
-                 << result.shared << '\n';
+    printLine("Shared unique fingerprints: " +
+              to_string(result.shared) + "\n");
 
-            cout << "Similarity: "
-                 << result.similarity << "%\n";
-        }
+    ostringstream score;
+    score << fixed << setprecision(2) << result.similarity;
+    printLine("Similarity: " + score.str() + "%\n");
+}
 
+report.close();
         hash_table_destroy(&table);
     }
     catch (const exception& e)
