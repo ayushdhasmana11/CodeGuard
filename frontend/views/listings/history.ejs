@@ -1,0 +1,117 @@
+
+<% layout("/layouts/boilerplate") -%>
+
+<div class="container py-5">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold">CodeGuard Results</h2>
+      <p class="text-muted mb-0">
+        View your previous code analysis reports.
+      </p>
+    </div>
+
+    <a href="/listings/new" class="btn btn-dark">
+      + Submit Code
+    </a>
+  </div>
+
+  <% if (submissions.length === 0) { %>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body text-center py-5">
+        <h5>No submissions found</h5>
+        <p class="text-muted">
+          Submit your first source-code file to see its results here.
+        </p>
+        <a href="/listings/new" class="btn btn-dark">
+          Submit Your Code
+        </a>
+      </div>
+    </div>
+
+  <% } else { %>
+
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+
+          <thead class="table-light">
+            <tr>
+              <th>Student</th>
+              <th>Assignment</th>
+              <th>File</th>
+              <th>Highest Similarity</th>
+              <th>Status</th>
+              <th>Action</th>
+              <th>Resubmit</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% submissions.forEach(submission => { %>
+              <tr>
+                <td>
+                  <strong><%= submission.studentName %></strong>
+                  <div class="small text-muted">
+                    Roll No. <%= submission.rollNumber %>
+                  </div>
+                </td>
+
+                <td><%= submission.assignment %></td>
+
+                <td><%= submission.fileName %></td>
+
+                <td>
+                  <% if (submission.plagiarismPercentage != null) { %>
+                    <strong>
+                      <%= Number(submission.plagiarismPercentage).toFixed(2) %>%
+                    </strong>
+                  <% } else { %>
+                    <span class="text-muted">Not available</span>
+                  <% } %>
+                </td>
+
+                <td>
+                  <% if (submission.status === "completed") { %>
+                    <span class="badge bg-success">Completed</span>
+                  <% } else if (submission.status === "processing") { %>
+                    <span class="badge bg-warning text-dark">Processing</span>
+                  <% } else if (submission.status === "failed") { %>
+                    <span class="badge bg-danger">Failed</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary">Pending</span>
+                  <% } %>
+                </td>
+
+                <td>
+                  <% if (submission.status === "completed") { %>
+                    <a
+                      href="/listings/<%= submission._id %>/results"
+                      class="btn btn-sm btn-outline-dark"
+                    >
+                      View Report
+                    </a>
+                  <% } else { %>
+                    <span class="text-muted">Unavailable</span>
+                  <% } %>
+                </td>
+                <td>
+  <a
+    href="/listings/<%= submission._id %>/resubmit"
+    class="btn btn-sm btn-outline-primary"
+  >
+    Resubmit
+  </a>
+</td>
+              </tr>
+            <% }) %>
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+
+  <% } %>
+
+</div>

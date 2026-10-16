@@ -1,0 +1,139 @@
+
+<% layout("/layouts/boilerplate") -%>
+
+<div class="container py-5">
+
+  <div class="mb-4">
+    <a href="/listings" class="text-decoration-none">
+      &larr; Back to submissions
+    </a>
+    <h2 class="mt-3 fw-bold">CodeGuard Analysis Report</h2>
+    <p class="text-muted">
+      Your source code has been analyzed successfully.
+    </p>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <div class="row g-4">
+
+        <div class="col-md-8">
+          <p class="text-muted mb-1">Assignment</p>
+          <h4 class="fw-bold"><%= submission.assignment %></h4>
+
+          <p class="text-muted mb-1 mt-3">Submitted file</p>
+          <p class="mb-0">
+            <%= submission.fileName %>
+          </p>
+
+          <p class="text-muted mb-1 mt-3">Student</p>
+          <p class="mb-0"><%= submission.studentName %></p>
+        </div>
+
+        <div class="col-md-4">
+          <div class="bg-light rounded-3 p-4 text-center">
+            <p class="text-muted mb-2">Highest similarity</p>
+
+            <h1 class="fw-bold mb-2">
+              <%= Number(submission.plagiarismPercentage || 0).toFixed(2) %>%
+            </h1>
+
+            <% if (submission.plagiarismPercentage >= 70) { %>
+              <span class="badge bg-danger">High similarity</span>
+            <% } else if (submission.plagiarismPercentage >= 30) { %>
+              <span class="badge bg-warning text-dark">
+                Moderate similarity
+              </span>
+            <% } else { %>
+              <span class="badge bg-success">Low similarity</span>
+            <% } %>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+
+      <h4 class="fw-bold mb-1">File Comparisons</h4>
+      <p class="text-muted mb-4">
+        Similarity scores for files in the same assignment.
+      </p>
+
+      <% if (submission.comparisonResults &&
+             submission.comparisonResults.length > 0) { %>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Compared file</th>
+                <th>Similarity</th>
+                <th style="min-width: 160px;">Score</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% submission.comparisonResults.forEach(result => { %>
+                <tr>
+                  <td class="fw-semibold">
+                    <%= result.comparedFileName %>
+                  </td>
+
+                  <td>
+                    <%= Number(result.similarityPercentage).toFixed(2) %>%
+                  </td>
+
+                  <td>
+                    <div
+                      class="progress"
+                      role="progressbar"
+                      aria-valuenow="<%= result.similarityPercentage %>"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      style="height: 8px;"
+                    >
+                      <div
+                        class="progress-bar <%= result.similarityPercentage >= 70
+                          ? 'bg-danger'
+                          : result.similarityPercentage >= 30
+                            ? 'bg-warning'
+                            : 'bg-success' %>"
+                        style="width: <%= result.similarityPercentage %>%"
+                      ></div>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+      <% } else { %>
+
+        <div class="text-center py-4">
+          <h5>No similar files found</h5>
+          <p class="text-muted mb-0">
+            There were no file comparisons to display for this submission.
+          </p>
+        </div>
+
+      <% } %>
+
+      <div class="alert alert-secondary mt-3 mb-0">
+        <strong>Note:</strong> Similarity scores indicate code similarity
+        they do not independently prove plagiarism.
+      </div>
+
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a href="/listings/new" class="btn btn-dark">
+      Submit another file
+    </a>
+  </div>
+
+</div>

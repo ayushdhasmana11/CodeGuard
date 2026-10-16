@@ -1,4 +1,4 @@
-#include <fstream>
+
 #include <iostream>
 #include <filesystem>
 #include <string>
@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <sstream>
+#include <fstream>
 
 #include "Reader/CodeReader.h"
 #include "Preprocessing/Preprocessor.h"
@@ -17,15 +18,14 @@
 #include "HashTable/hash_table.h"
 
 using namespace std;
+namespace fs = std::filesystem;
 
-struct FileData
-{
+struct FileData {
     string filename;
     vector<uint64_t> fingerprints;
 };
 
-struct SimilarityResult
-{
+struct SimilarityResult {
     string fileA;
     string fileB;
     size_t uniqueA;
@@ -34,194 +34,154 @@ struct SimilarityResult
     double similarity;
 };
 
-int main()
-{
+int main(int argc, char* argv[]) {
     CodeReader reader;
     Preprocessor preprocessor;
     Tokenizer tokenizer;
     FingerprintGenerator fingerprintGenerator;
-
     HashTable table{};
 
-    try
-    {
-        vector<fs::path> files = reader.getCppFiles("data");
+    bool tableInitialized = false;
 
-        if (files.empty())
-        {
-            cout << "No source files found in data folder.\n";
+    try {
+        string inputDirectory = "data";
+        if (argc > 1) {
+            inputDirectory = argv[1];
+        }
+
+        vector<fs::path> files = reader.getCppFiles(inputDirectory);
+        cout << "\nC++ files found: " << files.size() << '\n';
+
+        if (files.empty()) {
+            cout << "No C++ files found in " << inputDirectory << ".\n";
             return 0;
         }
 
-        if (!hash_table_init(&table, 1009))
-        {
-            cerr << "Failed to initialize hash table.\n";
-            return 1;
+        if (!hash_table_init(&table, 1009)) {
+            throw runtime_error("Failed to initialize hash table.");
         }
+        tableInitialized = true;
 
         vector<FileData> allFiles;
 
-        // Stage 1: Read, clean, tokenize and fingerprint each file.
-        for (const auto& filePath : files)
-        {
-            string originalCode =
-                reader.readFile(filePath.string());
-
-            string cleanedCode =
-                preprocessor.cleanCode(originalCode);
-
-            vector<string> tokens =
-                tokenizer.tokenize(cleanedCode);
-
+        // Stage 1: Read, clean, tokenize, and fingerprint each file.
+        for (const auto& filePath : files) {
+            string originalCode = reader.readFile(filePath.string());
+            string cleanedCode = preprocessor.cleanCode(originalCode);
+            vector<string> tokens = tokenizer.tokenize(cleanedCode);
             vector<uint64_t> fingerprints =
                 fingerprintGenerator.generate(tokens);
 
-            FileData data;
-            data.filename = filePath.filename().string();
-            data.fingerprints = fingerprints;
+            FileData currentFile;
+            currentFile.filename = filePath.filename().string();
+            currentFile.fingerprints = fingerprints;
 
-            for (uint64_t fingerprint : fingerprints)
-            {
+            for (uint64_t fingerprint : fingerprints) {
                 if (!hash_table_insert(
-                        &table,
-                        fingerprint,
-                        data.filename.c_str()))
-                {
+                        &table, fingerprint,
+                        currentFile.filename.c_str())) {
                     throw runtime_error(
-                        "Failed to insert fingerprint into hash table."
-                    );
+                        "Failed to insert fingerprint into hash table.");
                 }
             }
 
-            cout << "\nFile: " << data.filename << '\n';
-            cout << "Tokens: " << tokens.size() << '\n';
-            cout << "Fingerprints: "
-                 << fingerprints.size() << '\n';
+            cout << "Processed: " << currentFile.filename
+                 << " | Tokens: " << tokens.size()
+                 << " | Fingerprints: " << fingerprints.size() << '\n';
 
-            allFiles.push_back(data);
+            allFiles.push_back(currentFile);
         }
 
-        // Stage 2: Calculate similarity for every file pair.
+        // Stage 2: Compare every distinct pair using unique fingerprints.
         vector<SimilarityResult> results;
 
-        for (size_t i = 0; i < allFiles.size(); ++i)
-        {
-            for (size_t j = i + 1; j < allFiles.size(); ++j)
-            {
+        for (size_t i = 0; i < allFiles.size(); ++i) {
+            for (size_t j = i + 1; j < allFiles.size(); ++j) {
                 const auto& a = allFiles[i];
                 const auto& b = allFiles[j];
 
                 unordered_set<uint64_t> uniqueA(
-                    a.fingerprints.begin(),
-                    a.fingerprints.end());
-
+                    a.fingerprints.begin(), a.fingerprints.end());
                 unordered_set<uint64_t> uniqueB(
-                    b.fingerprints.begin(),
-                    b.fingerprints.end());
+                    b.fingerprints.begin(), b.fingerprints.end());
 
                 size_t shared = 0;
-
-                for (uint64_t fingerprint : uniqueA)
-                {
-                    if (uniqueB.count(fingerprint) > 0)
-                    {
+                for (uint64_t fingerprint : uniqueA) {
+                    if (uniqueB.count(fingerprint) > 0) {
                         ++shared;
                     }
                 }
 
                 size_t totalA = uniqueA.size();
                 size_t totalB = uniqueB.size();
-
                 double similarity = 0.0;
 
-                if (totalA + totalB > 0)
-                {
+                if (totalA + totalB > 0) {
                     similarity =
-                        (2.0 * shared /
-                         (totalA + totalB)) * 100.0;
+                        (2.0 * shared / (totalA + totalB)) * 100.0;
                 }
 
                 results.push_back({
-                    a.filename,
-                    b.filename,
-                    totalA,
-                    totalB,
-                    shared,
-                    similarity
+                    a.filename, b.filename,
+                    totalA, totalB, shared, similarity
                 });
             }
         }
 
-        // Stage 3: Sort highest similarity first.
+        // Stage 3: Rank highest similarity first.
         sort(results.begin(), results.end(),
-             [](const SimilarityResult& a,
-                const SimilarityResult& b)
-             {
-                 if (a.similarity != b.similarity)
-                 {
-                     return a.similarity > b.similarity;
-                 }
+            [](const SimilarityResult& a, const SimilarityResult& b) {
+                if (a.similarity != b.similarity) {
+                    return a.similarity > b.similarity;
+                }
+                if (a.fileA != b.fileA) {
+                    return a.fileA < b.fileA;
+                }
+                return a.fileB < b.fileB;
+            });
 
-                 if (a.fileA != b.fileA)
-                 {
-                     return a.fileA < b.fileA;
-                 }
-
-                 return a.fileB < b.fileB;
-             });
-
-        // Stage 4: Print the ranked report.
-
+        // Stage 4: Write the ranked report to disk and console.
+        fs::create_directories("reports");
         ofstream report("reports/similarity_report.txt");
 
-if (!report.is_open())
-{
-    throw runtime_error("Could not create similarity report file.");
-}
-
-report << "========== RANKED SIMILARITY REPORT ==========\n";
-
-        cout << "\n========== RANKED SIMILARITY REPORT ==========\n";
-
+        if (!report.is_open()) {
+            throw runtime_error("Could not create similarity report file.");
+        }
 
         cout << fixed << setprecision(2);
+        report << fixed << setprecision(2);
 
-        auto printLine = [&](const string& text)
-{
-    cout << text;
-    report << text;
-};
+        const string heading = "========== RANKED SIMILARITY REPORT ==========\n";
+        cout << '\n' << heading;
+        report << heading;
 
-      for (size_t i = 0; i < results.size(); ++i)
-{
-    const auto& result = results[i];
+        for (size_t i = 0; i < results.size(); ++i) {
+            const auto& result = results[i];
+            ostringstream line;
+            line << "\nRank #" << i + 1 << '\n'
+                 << result.fileA << " <-> " << result.fileB << '\n'
+                 << "Unique fingerprints in A: " << result.uniqueA << '\n'
+                 << "Unique fingerprints in B: " << result.uniqueB << '\n'
+                 << "Shared unique fingerprints: " << result.shared << '\n'
+                 << "Similarity: " << result.similarity << "%\n";
 
-    printLine("\nRank #" + to_string(i + 1) + "\n");
-    printLine(result.fileA + " <-> " + result.fileB + "\n");
+            cout << line.str();
+            report << line.str();
+        }
 
-    printLine("Unique fingerprints in A: " +
-              to_string(result.uniqueA) + "\n");
+        cout << "\nFiles processed: " << allFiles.size() << '\n';
+        cout << "Comparisons performed: " << results.size() << '\n';
+        cout << "Report saved to reports/similarity_report.txt\n";
 
-    printLine("Unique fingerprints in B: " +
-              to_string(result.uniqueB) + "\n");
-
-    printLine("Shared unique fingerprints: " +
-              to_string(result.shared) + "\n");
-
-    ostringstream score;
-    score << fixed << setprecision(2) << result.similarity;
-    printLine("Similarity: " + score.str() + "%\n");
-}
-
-report.close();
+        report.close();
         hash_table_destroy(&table);
+        return 0;
     }
-    catch (const exception& e)
-    {
-        hash_table_destroy(&table);
-        cerr << "Error: " << e.what() << '\n';
+    catch (const exception& e) {
+        if (tableInitialized) {
+            hash_table_destroy(&table);
+        }
+        cerr << "\nCodeGuard error: " << e.what() << '\n';
         return 1;
     }
-
-    return 0;
 }

@@ -2,6 +2,22 @@
 #include <cctype>
 using namespace std;
 
+#include <sstream>
+
+string removeBlankLines(const string& code) {
+    string result;
+    string line;
+    istringstream stream(code);
+
+    while (getline(stream, line)) {
+        if (line.find_first_not_of(" \t\r") != string::npos) {
+            result += line + '\n';
+        }
+    }
+
+    return result;
+}
+
 std::string Preprocessor::cleanCode(const std::string &code){
     std::string result;
     result.reserve(code.size());
@@ -19,6 +35,10 @@ std::string Preprocessor::cleanCode(const std::string &code){
         if(inSingleLinecomment){
             if(ch=='\n'){
                 inSingleLinecomment = false;
+                if(!result.empty() && result.back()=='\n'){
+                    previousWasSpace=false;
+                    continue;
+                }
                 result+='\n';
                 previousWasSpace = false;
             }
@@ -110,5 +130,5 @@ std::string Preprocessor::cleanCode(const std::string &code){
         previousWasSpace=false;
 
     }
-return result;
+return removeBlankLines(result);
 }

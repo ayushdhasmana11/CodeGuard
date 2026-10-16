@@ -7,6 +7,13 @@
     <h3>Submit Your Code</h3>
 
      <form method="POST" action="/listings" enctype="multipart/form-data" novalidate class="needs-validation">
+      <% if (typeof previous !== "undefined" && previous) { %>
+    <input
+      type="hidden"
+      name="submissionId"
+      value="<%= previous._id %>"
+    >
+  <% } %>
       <div class="mb-3">
         <label for="studentName" class="form-label">Student Name</label>
         <input
@@ -15,6 +22,7 @@
           placeholder="Enter your full name"
           type="text"
           class="form-control"
+          value="<%= typeof previous !== 'undefined' ? previous.studentName : '' %>"
           required
         >
       </div>
@@ -29,6 +37,7 @@
     class="form-control"
     min="1"
     step="1"
+    value="<%= typeof previous !== 'undefined' ? previous.rollNumber : '' %>"
     required
   >
 </div>
@@ -43,10 +52,11 @@
           required
         >
           <option value="" selected disabled>Select assignment</option>
-          <option value="Linked List Implementation">Linked List Implementation</option>
-          <option value="Sorting Algorithms">Sorting Algorithms</option>
-          <option value="Binary Trees">Binary Trees</option>
-          <option value="Graph Algorithms">Graph Algorithms</option>
+          <option value="Assignment 1">Assignment 1</option>
+          <option value="Assignment 2">Assignment 2</option>
+          <option value="Assignment 3">Assignment 3</option>
+          <option value="Assignment 4">Assignment 4</option>
+          <option value="Others">Others</option>
         </select>
       </div>
 
@@ -72,11 +82,11 @@
           id="codeFile"
           type="file"
           class="form-control"
-          accept=".cpp,.c,.java"
+          accept=".cpp,.c"
           required
         >
         <div class="form-text">
-          Upload a .cpp, .c, or .java file. Maximum size: 1 MB.
+          Upload a .cpp, .c file. Maximum size: 1 MB.
         </div>
       </div>
 

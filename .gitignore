@@ -13,4 +13,6 @@ main.exe
 hash_table_test
 pipeline_test
 preprocessor_test
-reader_test
+reader_testfrontend/node_modules/
+hash_table.o token_list.o
+main.exe

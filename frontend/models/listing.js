@@ -1,26 +1,20 @@
-// const mongoose = require("mongoose");
-// const Schema = mongoose.Schema;
-
-// const listingSchema = new Schema({
-//   Student Name: {
-//     type: String,
-//     required: true,
-//   },
-//   description: String,
-//   price: Number,
-//   location: String,
-//   country: String
-// }); 
-
-
-// const Listing = mongoose.model("Listing", listingSchema);
-
-// module.exports = Listing;
-
-
-
-
 const mongoose = require("mongoose");
+
+const comparisonResultSchema = new mongoose.Schema({
+  comparedFileName: {
+    type: String,
+    required: true,
+  },
+  similarityPercentage: {
+      type: Number,
+      min: 0,
+      max: 100,
+      required: true,
+    },
+  },
+    {_id: false},
+  );
+
 
 const submissionSchema = new mongoose.Schema(
   {
@@ -33,7 +27,6 @@ const submissionSchema = new mongoose.Schema(
     rollNumber: {
       type: Number,
       required: true,
-      trim: true,
       min: 1,
       validate: {
         validator: Number.isSafeInteger,
@@ -66,8 +59,8 @@ const submissionSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Pending", "Processing", "Completed", "Failed"],
-      default: "Pending",
+      enum: ["pending", "processing", "completed", "failed"],
+      default: "pending",
     },
 
     plagiarismPercentage: {
@@ -76,6 +69,16 @@ const submissionSchema = new mongoose.Schema(
       max: 100,
       default: null,
     },
+
+    comparisonResults: {
+      type: [comparisonResultSchema],
+      default: [],
+    },
+
+    engineError: {
+      type: String,
+      default: null
+    }
   },
   {
     timestamps: true,

@@ -137,6 +137,7 @@ int hash_table_insert(
     return 1;
 }
 
+
 /* Find all files associated with a fingerprint. */
 const SourceFile *hash_table_lookup(
     const HashTable *table,
